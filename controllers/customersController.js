@@ -39,8 +39,6 @@ async function orderCompleted(req, res)
     customer.cart.total = 0
     await customer.save()
 
-    console.log(id)
-
     res.status(200).json({'message': `Order ${finalOrder._id} Was Placed Successfully!`})
 }
 
