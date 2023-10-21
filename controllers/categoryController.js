@@ -7,6 +7,14 @@ async function getCategories(req, res)
     res.status(200).json(categories)
 }
 
+async function getCategory(req, res)
+{
+    const { id } = req.params
+    const category = await Category.findById(id).lean().exec()
+    if(!category) return res.status(400).json({'message': 'Category Does Not Exist!'})
+    res.status(200).json(category)
+}
+
 async function addCategory(req, res)
 {
     const { category } = req.body
@@ -17,4 +25,4 @@ async function addCategory(req, res)
                     : res.status(400).json({'message': 'Something Went Wrong!'})
 }
 
-module.exports = { getCategories, addCategory }
+module.exports = { getCategories, getCategory, addCategory }
