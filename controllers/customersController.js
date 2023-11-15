@@ -251,8 +251,8 @@ async function checkOut(req, res)
         {
             line_items: [...line_items],
             mode: 'payment',
-            success_url: `http://localhost:3000/success`,
-            cancel_url: `http://localhost:3000`,
+            success_url: `https://njshop.vercel.app/success`,
+            cancel_url: `https://njshop.vercel.app`,
         })
     
     // res.redirect(200, stripeOrder.url);
