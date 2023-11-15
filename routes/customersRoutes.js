@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getCustomers, getCustomer, addCustomer, updateCart, checkOut, orderCompleted } = require('../controllers/customersController')
+const { getCustomers, getCustomer, addCustomer, updateCart, checkOut, orderCompleted, getFavs, updateFavs } = require('../controllers/customersController')
 const verifyJwt  = require('../middleware/verifyJwt')
 
 router.route('/')
@@ -17,5 +17,11 @@ router.route('/orders')
 
 router.route('/success/:id')
     .get(orderCompleted)
+
+router.route('/favs/:id')
+    .get(getFavs)
+
+router.route('/favs')
+    .patch(updateFavs)
 
 module.exports = router

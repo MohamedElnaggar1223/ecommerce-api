@@ -20,7 +20,7 @@ async function orderCompleted(req, res)
     const customer = await Customer.findById(id).exec()
     if(!customer) return res.status(400).json({'message': 'Customer Does Not Exist!'})
 
-    const products = customer.cart?.items.map(item => item.product)
+    const products = customer.cart?.items.map(item => ({product: item.product, count: item.count}))
     //@ts-ignore
     const subTotal = customer.cart.total
     const total = subTotal
@@ -78,7 +78,7 @@ async function addCustomer(req, res)
 
 async function updateCart(req, res)
 {
-    const { id, product, action } = req.body
+    const { id, product, action, count } = req.body
     if(!id || !product || !action) return res.status(400).json({'message': 'All Fields Must Be Given!'})
 
     const customer = await Customer.findById(id).exec()
@@ -89,18 +89,39 @@ async function updateCart(req, res)
 
     if(action === 'add')
     {
-        const cartProduct = customer.cart?.items.find(cartProduct => cartProduct.product?.toString() === product)
-        if(cartProduct !== null && cartProduct !== undefined)
+        if(count)
         {
-            //@ts-ignore
-            cartProduct.count = cartProduct.count + 1
+            for(let i = 0; i < count; i++)
+            {
+                const cartProduct = customer.cart?.items.find(cartProduct => cartProduct.product?.toString() === product)
+                if(cartProduct !== null && cartProduct !== undefined)
+                {
+                    //@ts-ignore
+                    cartProduct.count = cartProduct.count + 1
+                }
+                else
+                {
+                    customer.cart?.items.push({ product, count: 1 })
+                }
+                //@ts-ignore
+                customer.cart.total +=  productUpdated.price
+            }
         }
         else
         {
-            customer.cart?.items.push({ product, count: 1 })
+            const cartProduct = customer.cart?.items.find(cartProduct => cartProduct.product?.toString() === product)
+            if(cartProduct !== null && cartProduct !== undefined)
+            {
+                //@ts-ignore
+                cartProduct.count = cartProduct.count + 1
+            }
+            else
+            {
+                customer.cart?.items.push({ product, count: 1 })
+            }
+            //@ts-ignore
+            customer.cart.total +=  productUpdated.price
         }
-        //@ts-ignore
-        customer.cart.total +=  productUpdated.price
     }
     else if(action === 'remove')
     {
@@ -147,6 +168,46 @@ async function updateCart(req, res)
     const updatedCart = await customer.save()
 
     res.status(200).json({'message': `${updatedCart.username}'s Cart Updated Successfully!`})
+}
+
+async function updateFavs(req, res)
+{
+    const { id, product } = req.body
+    if(!id || !product) return res.status(400).json({'message': 'All Fields Must Be Given!'})
+
+    const customer = await Customer.findById(id).exec()
+    if(!customer) return res.status(400).json({'message': 'Customer Does Not Exist!'})
+
+    const productUpdated = await Product.findById(product).lean().exec()
+    if(!productUpdated) return res.status(400).json({'message': 'Product Does Not Exist!'})
+
+    const included = customer.favourites.find(prod => prod.toString() === product)
+
+    if(included) 
+    {
+        const favs = customer.favourites
+        const filtered = favs.filter(prod => prod.toString() !== product)
+        customer.favourites = filtered
+    }
+    else
+    {
+        customer.favourites.push(product)
+    }
+    await customer.save()
+
+    return res.status(200).json({ 'message': 'Updated Favourites!' })
+}
+
+async function getFavs(req, res)
+{
+    const { id } = req.params
+    if(!id) return res.status(400).json({ 'message': 'All Fields Must Be Given!' })
+
+    const customer = await Customer.findById(id).select('favourites').lean().exec()
+    if(!customer) res.status(400).json({ 'message': 'Customer Does Not Exist!' })
+
+    const favs = customer?.favourites
+    return res.status(200).json(favs)
 }
 
 async function checkOut(req, res)
@@ -199,4 +260,4 @@ async function checkOut(req, res)
     res.status(200).json({'url': stripeOrder.url})
 }
 
-module.exports = { getCustomers, getCustomer, addCustomer, updateCart, checkOut, orderCompleted }
+module.exports = { getCustomers, getCustomer, addCustomer, updateCart, checkOut, orderCompleted, getFavs, updateFavs }

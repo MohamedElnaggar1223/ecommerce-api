@@ -11,12 +11,21 @@ const Order = new Schema(
             index: true
         },
         products:
-        {
-            type: [Schema.Types.ObjectId],
-            ref: 'Product',
-            required: true,
-            index: true
-        },
+        [
+            {
+                product: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Product',
+                    required: true,
+                    index: true
+                },
+                count: {
+                    type: Number,
+                    required: true,
+                    index: true
+                }
+            }
+        ],
         subTotal: 
         {
             type: Number,

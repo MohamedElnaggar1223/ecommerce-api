@@ -52,6 +52,13 @@ const Customer = new Schema(
             ref: 'Order',
             default: [],
             index: true
+        },
+        favourites:
+        {
+            type: [Schema.Types.ObjectId],
+            ref: 'Product',
+            default: [],
+            index: true
         }
     })
 
