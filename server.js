@@ -18,6 +18,7 @@ app.use(express.json())
 app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.urlencoded({ extended: true }))
 
 app.use('/', require(path.join(__dirname, 'routes', 'root')))
 app.use('/products', require(path.join(__dirname, 'routes', 'productsRoutes')))
@@ -26,6 +27,7 @@ app.use('/customers', require(path.join(__dirname, 'routes', 'customersRoutes'))
 app.use('/delivery', require(path.join(__dirname, 'routes', 'deliveryRoutes')))
 app.use('/orders', require(path.join(__dirname, 'routes', 'ordersRoutes')))
 app.use('/category', require(path.join(__dirname, 'routes', 'categoryRoutes')))
+app.use('/categories', require(path.join(__dirname, 'routes', 'categoryRoutes')))
 app.use('/auth', require(path.join(__dirname, 'routes', 'authRoutes')))
 
 app.use('*', (req, res) => 

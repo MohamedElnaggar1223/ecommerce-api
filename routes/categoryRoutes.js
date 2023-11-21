@@ -6,6 +6,8 @@ const verifyAdmin  = require('../middleware/verifyAdmin')
 router.route('/')
     .get(getCategories)
     //.post(verifyAdmin, addCategory)
+
+router.route('/create')
     .post(addCategory)
 
 router.route('/:id')

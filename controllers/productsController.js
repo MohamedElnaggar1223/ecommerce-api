@@ -3,17 +3,46 @@ const Category = require('../models/Category')
 
 async function getProducts(req, res)
 {
-    const products = await Product.find().lean().exec()
-    if(!products || !products?.length) return res.status(400).json({'message': 'No Products Yet!'})
-    res.status(200).json(products)
+    const { _start, _end, _sort, _order, title_like = '', categoryName = '' } = req.query
+
+    const query = {}
+
+    if(title_like)
+    {
+        query.title = {$regex: title_like, $options: 'i'}
+    }
+
+    if(categoryName != '')
+    {
+        query.categoryName = categoryName
+    }
+
+    const count = await Product.countDocuments({ query })
+
+    const products = await Product
+        .find(query)
+        .limit(_end)
+        .skip(_start)
+        .sort({ [_sort]: _order })
+        .select('-__v')
+        .lean()
+        .exec()
+
+    if(!products || !products?.length) return res.status(200).json([])
+    const allProds = products.map(prod => ({ id: prod._id, ...prod }))
+    res.header('x-total-count', count)
+    res.header('Access-Control-Expose-Headers', 'x-total-count')
+    return res.status(200).json(allProds)
 }
 
 async function getProduct(req, res)
 {
     const { id } = req.params
-    const product = await Product.findById(id).lean().exec()
+    const product = await Product.findById(id).select('-updatedAt -createdAt -__v -categoryName -category').lean()
+    const categories = await Category.find().select('-updatedAt -createdAt -__v -_id').lean()
     if(!product) return res.status(400).json({'message': 'Product Does Not Exist!'})
-    res.status(200).json(product)
+    // console.log({...product, category: Object.values(categories).map(cat => cat.category)})
+    return res.status(200).json(product)
 }
 
 async function addProduct(req, res)
@@ -54,32 +83,48 @@ async function addProduct(req, res)
 
 async function updateProduct(req, res)
 {
-    const { id, title, description, price, category, available } = req.body
-    if(!id || !title || !description || !price || typeof price !== 'number' || !category || typeof available !== 'boolean') return res.status(400).json({'message': 'All Fields Must Be Given!'})
+    console.log('entered')
+    const { id } = req.params
+    const { title, description, price, category, available, image } = req.body
+    // console.log(id, title, description, price, category, available)
+    console.log(title, description, price, category, available, image.slice(0, 15))
+    if(!id || !title || !image || !description || !price || typeof price !== 'number' || !category || typeof available !== 'boolean') return res.status(400).json({'message': 'All Fields Must Be Given!'})
     
     const product = await Product.findById(id).exec()
     if(!product) return res.status(400).json({'message': 'Product Does Not Exist!'})
 
+    // console.log(product)
+
     const duplicate = await Product.findOne({ title }).lean().exec()
     if(duplicate && duplicate?._id.toString() !== id) return res.status(400).json({'message': 'Title Already Exists!'})
 
-    const categoryChosen = await Category.findById(category).lean().exec()
+    // console.log(duplicate)
+    const categoryChosen = await Category.findOne({ category }).lean().exec()
     if(!categoryChosen) return res.status(400).json({'message': 'Category Does Not Exist!'})
 
-    product.title = title
-    product.description = description
-    product.price = price
-    product.available = available
-    product.category = category
-    product.categoryName = categoryChosen.category
+    // console.log(categoryChosen)
 
-    const updatedProduct = await product.save()
-    res.status(200).json({'message': `Product ${updatedProduct.title} Updated Successfully!`})
+    await Product.findByIdAndUpdate(
+        { _id: id },
+        {
+            title,
+            description,
+            category: categoryChosen,
+            price,
+            available,
+            image,
+        },
+    );
+
+    // const updatedProduct = await product.save()
+
+    // console.log(updatedProduct)
+    return res.status(200).json({'message': `Product Updated Successfully!`})
 }
 
 async function deleteProduct(req, res)
 {
-    const { id } = req.body
+    const { id } = req.params
     if(!id) return res.status(400).json({'message': 'ID Must Be Given!'})
 
     const product = await Product.findById(id).exec()

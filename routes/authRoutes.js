@@ -15,6 +15,6 @@ router.route('/refresh')
     .get(refresh)
 
 router.route('/logout')
-    .post(logout)
+    .get(logout)
 
 module.exports = router

@@ -8,11 +8,17 @@ router.route('/')
     // .post(verifyAdmin, addProduct)
     // .patch(verifyAdmin, updateProduct)
     // .delete(verifyAdmin, deleteProduct)
+router.route('/create')
     .post(addProduct)
-    .patch(updateProduct)
-    .delete(deleteProduct)
 
 router.route('/:id')
+    .patch(updateProduct)
+    .get(getProduct)
+
+router.route('/delete/:id')
+    .delete(deleteProduct)
+
+router.route('/show/:id')
     .get(getProduct)
 
 module.exports = router

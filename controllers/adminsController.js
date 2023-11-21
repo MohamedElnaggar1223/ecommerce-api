@@ -1,11 +1,39 @@
 const Admin = require('../models/Admin')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 async function getAdmins(req, res)
 {
     const admins = await Admin.find().select('-password -__v').lean().exec()
     if(!admins || !admins?.length) return res.status(400).json({'message': 'No Admins Yet!'})
     res.status(200).json(admins)
+}
+
+async function getAdminIdentity(req, res)
+{
+    const headers = req.headers.authorization || req.headers.Authorization
+    if(!headers?.startsWith('Bearer ')) return res.status(401).json({'message': 'Unauthorized By Server!'})
+    
+    const token = headers.split(' ')[1]
+    jwt.verify(
+        token, 
+        //@ts-ignore
+        process.env.ACCESS_TOKEN_SECRET, 
+        async (err, decoded) => 
+        {
+            if(err) return res.status(403).json({'message': 'Forbiden By Server!'})
+
+            //@ts-ignore
+            if(decoded.UserInfo.admin)
+            {
+                //@ts-ignore
+                const { id } = decoded.UserInfo
+
+                const admin = await Admin.findById(id).lean().select('-__v -password').exec()
+                return res.status(200).json(admin)
+            }
+        }
+    )
 }
 
 async function addAdmin(req, res)
@@ -51,4 +79,4 @@ async function updateAdmin(req, res)
     res.status(200).json({'message': `Admin ${updatedAdmin.username} Updated Successfully!`})
 }
 
-module.exports = { getAdmins, addAdmin, updateAdmin }
+module.exports = { getAdmins, addAdmin, updateAdmin, getAdminIdentity }

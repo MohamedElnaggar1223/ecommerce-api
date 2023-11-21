@@ -6,7 +6,7 @@ const verifyAdmin  = require('../middleware/verifyAdmin')
 //router.use(verifyAdmin)
 
 router.route('/')
-    .get(getOrders)
+    .get(verifyAdmin, getOrders)
 
 router.route('/:id')
     .get(getMyOrders)

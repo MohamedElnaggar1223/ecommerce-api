@@ -61,7 +61,6 @@ async function adminLogin(req, res)
 
     const correctPwd = await bcrypt.compare(password, admin.password)
     if(!correctPwd) return res.status(400).json({'message': 'Wrong Password!'})
-
     const accessToken = jwt.sign(
         {
             "UserInfo": 
@@ -85,6 +84,7 @@ async function adminLogin(req, res)
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '7d' }
     )
+
     res.cookie('jwt', 
     refreshToken, 
     { 
@@ -120,7 +120,7 @@ async function deliveryLogin(req, res)
         }, 
         //@ts-ignore
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1m' }
+        { expiresIn: '15m' }
     )
 
     const refreshToken = jwt.sign(
@@ -155,7 +155,7 @@ async function refresh(req, res)
         //@ts-ignore
         process.env.REFRESH_TOKEN_SECRET, 
         async (err, decoded) => 
-        {
+        {            
             if(err) return res.status(403).json({'message': 'Forbiden By Server!'})
 
             //@ts-ignore
@@ -176,8 +176,9 @@ async function refresh(req, res)
                     }, 
                     //@ts-ignore
                     process.env.ACCESS_TOKEN_SECRET,
-                    { expiresIn: '1m' }
+                    { expiresIn: '15m' }
                 )
+
                 res.json({ accessToken })
             }
             //@ts-ignore
@@ -199,7 +200,7 @@ async function refresh(req, res)
                     }, 
                     //@ts-ignore
                     process.env.ACCESS_TOKEN_SECRET,
-                    { expiresIn: '1m' }
+                    { expiresIn: '15m' }
                 )
                 res.json({ accessToken })
             }
@@ -222,7 +223,7 @@ async function refresh(req, res)
                     }, 
                     //@ts-ignore
                     process.env.ACCESS_TOKEN_SECRET,
-                    { expiresIn: '1m' }
+                    { expiresIn: '15m' }
                 )
                 res.json({ accessToken })
             }
@@ -232,9 +233,6 @@ async function refresh(req, res)
 
 async function logout(req, res)
 {
-    const cookies = req.cookies
-    if(!cookies?.jwt) return res.status(401).json({'message': 'Unauthorized By Server'})
-
     res.clearCookie('jwt')
     res.json({'message': 'Logged Out Successfully!'})
 }
