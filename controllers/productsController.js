@@ -39,7 +39,6 @@ async function getProduct(req, res)
 {
     const { id } = req.params
     const product = await Product.findById(id).select('-updatedAt -createdAt -__v -categoryName -category').lean()
-    const categories = await Category.find().select('-updatedAt -createdAt -__v -_id').lean()
     if(!product) return res.status(400).json({'message': 'Product Does Not Exist!'})
     // console.log({...product, category: Object.values(categories).map(cat => cat.category)})
     return res.status(200).json(product)
@@ -85,9 +84,15 @@ async function updateProduct(req, res)
 {
     console.log('entered')
     const { id } = req.params
-    const { title, description, price, category, available, image } = req.body
+    const { title, description, price, category, available, image, additionalInfo } = req.body
     // console.log(id, title, description, price, category, available)
-    console.log(title, description, price, category, available, image.slice(0, 15))
+    // console.log(title, description, price, category, available, image.slice(0, 15), additionalInfo)
+    console.log(available)
+    const newAdditionalInfo = {}
+    additionalInfo.forEach(info => {
+        newAdditionalInfo[Object.keys(info)[0]] = Object.values(info)[0]
+    })
+
     if(!id || !title || !image || !description || !price || typeof price !== 'number' || !category || typeof available !== 'boolean') return res.status(400).json({'message': 'All Fields Must Be Given!'})
     
     const product = await Product.findById(id).exec()
@@ -104,17 +109,35 @@ async function updateProduct(req, res)
 
     // console.log(categoryChosen)
 
-    await Product.findByIdAndUpdate(
-        { _id: id },
-        {
-            title,
-            description,
-            category: categoryChosen,
-            price,
-            available,
-            image,
-        },
-    );
+    if(!additionalInfo?.length)
+    {
+        await Product.findByIdAndUpdate(
+            { _id: id },
+            {
+                title,
+                description,
+                category: categoryChosen,
+                price,
+                available,
+                image,
+            },
+        );
+    }
+    else
+    {
+        await Product.findByIdAndUpdate(
+            { _id: id },
+            {
+                title,
+                description,
+                category: categoryChosen,
+                price,
+                available,
+                image,
+                additionalInfo: newAdditionalInfo
+            },
+        );
+    }
 
     // const updatedProduct = await product.save()
 

@@ -39,3 +39,7 @@
 2023-11-21	21:52:00	74cfbacf-a7bb-4f17-bb66-07379824a295	Error: Not Allowed By Cors	
 2023-11-21	21:52:01	d20e406c-a60e-4d94-b05e-fd05abf993be	Error: Not Allowed By Cors	
 2023-11-21	21:52:06	fc9246dd-23d6-4442-bf34-238129a01a72	Error: Not Allowed By Cors	
+2023-11-24	09:29:57	d9a8dec9-ab53-4055-9ca5-99f9a4f4adc8	PayloadTooLargeError: request entity too large	
+2023-11-24	09:30:32	c686e020-3845-47f6-9b91-bb695f4a0302	PayloadTooLargeError: request entity too large	
+2023-11-24	09:31:48	7ee6c4c1-493d-44b3-991a-093f352a397f	PayloadTooLargeError: request entity too large	
+2023-11-24	09:32:45	5e8b632b-4857-4099-a0e5-b19c7c47c675	PayloadTooLargeError: request entity too large	

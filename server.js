@@ -13,6 +13,7 @@ const connectDB = require('./config/dbConn')
 const PORT = process.env.PORT || 3001
 
 connectDB()
+app.use(express.json({ limit: "50mb" }))
 app.use(logger)
 app.use(express.json())
 app.use(cors(corsOptions))
